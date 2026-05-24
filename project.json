@@ -1,0 +1,16 @@
+{
+  "id": "12",
+  "repo": "agentic-commerce-rbac-security",
+  "title": "RBAC and Data Security",
+  "summary": "JWT claims, role-based tool permissions, row-level order access, partner API boundaries, and PII masking.",
+  "copy": [
+    "backend",
+    "testing/unit_tests",
+    "pytest.ini"
+  ],
+  "extra_tests": {
+    "tests/test_rbac.py": "\n                from fastapi.testclient import TestClient\n                from app.main import app\n\n                client = TestClient(app, raise_server_exceptions=False)\n\n                def test_customer_cannot_see_other_customer_order():\n                    response = client.get('/orders/order_123', headers={'X-Demo-User': 'other_customer'})\n                    assert response.status_code == 403\n                    assert response.json()['error']['code'] == 'ORDER_ACCESS_DENIED'\n\n                def test_security_demo_masks_pii():\n                    payload = client.get('/security/demo?role=customer').json()\n                    assert '***' in payload['pii_masking']['email']\n            "
+  },
+  "verify": "python3.11 -m pytest testing/unit_tests tests",
+  "run": "cd backend && python3.11 -m uvicorn app.main:app --reload --port 8000"
+}
